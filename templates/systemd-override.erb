@@ -12,3 +12,6 @@ Environment=DATA_DIR=<%= @datadir %>
 <%- else -%>
 Environment=PGDATA=<%= @datadir %>
 <%- end -%>
+
+[Install]
+Alias=postgresql.service
