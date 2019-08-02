@@ -19,6 +19,16 @@ describe 'postgresql::server::config', type: :class do
       }
     end
 
+    it 'has SELinux port defined' do
+      is_expected.to contain_selinux__port('postgresql_custom_port').with({
+        :ensure   => 'present',
+        :seltype  => 'postgresql_port_t',
+        :protocol => 'tcp',
+        :port     => 5432,
+      })
+      .that_comes_before('Postgresql::Server::Config_entry[port]')
+    end
+
     it 'has the correct systemd-override file' do
       is_expected.to contain_file('systemd-override').with(
         ensure: 'present', path: '/etc/systemd/system/postgresql.service',

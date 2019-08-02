@@ -106,9 +106,20 @@ class postgresql::server::config {
     }
   }
 
+  if $facts['selinux'] {
+    selinux::port { 'postgresql_custom_port':
+        ensure   => 'present',
+        seltype  => 'postgresql_port_t',
+        protocol => 'tcp',
+        port     => $port,
+        before   => Postgresql::Server::Config_entry['port'],
+    }
+  }
+
   postgresql::server::config_entry { 'port':
     value => $port,
   }
+
   postgresql::server::config_entry { 'data_directory':
     value => $datadir,
   }
