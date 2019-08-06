@@ -34,30 +34,6 @@ class postgresql::params inherits postgresql::globals {
       $version_parts      = split($version, '[.]')
       $package_version    = "${version_parts[0]}${version_parts[1]}"
 
-      case $::operatingsystem {
-        'Amazon': {
-          $service_reload = "service ${service_name} reload"
-          $service_status = "service ${service_name} status"
-        }
-
-        # RHEL 5 uses SysV init, RHEL 6 uses upstart.  RHEL 7 and 8 both use systemd.
-        'RedHat', 'CentOS', 'Scientific', 'OracleLinux': {
-          if $::operatingsystemrelease =~ /^[78].*/ {
-            $service_reload = "systemctl reload ${service_name}"
-            $service_status = "systemctl status ${service_name}"
-          } else {
-            $service_reload = "service ${service_name} reload"
-            $service_status = "service ${service_name} status"
-          }
-        }
-
-        # Default will catch Fedora which uses systemd
-        default: {
-          $service_reload = "systemctl reload ${service_name}"
-          $service_status = "systemctl status ${service_name}"
-        }
-      }
-
       if $version == $postgresql::globals::default_version and $::operatingsystem != 'Amazon' {
         $client_package_name    = pick($client_package_name, 'postgresql')
         $server_package_name    = pick($server_package_name, 'postgresql-server')
@@ -97,6 +73,31 @@ class postgresql::params inherits postgresql::globals {
         }
         $confdir                = pick($confdir, $datadir)
       }
+
+      case $::operatingsystem {
+        'Amazon': {
+          $service_reload = "service ${service_name} reload"
+          $service_status = "service ${service_name} status"
+        }
+
+        # RHEL 5 uses SysV init, RHEL 6 uses upstart.  RHEL 7 and 8 both use systemd.
+        'RedHat', 'CentOS', 'Scientific', 'OracleLinux': {
+          if $::operatingsystemrelease =~ /^[78].*/ {
+            $service_reload = "systemctl reload ${service_name}"
+            $service_status = "systemctl status ${service_name}"
+          } else {
+            $service_reload = "service ${service_name} reload"
+            $service_status = "service ${service_name} status"
+          }
+        }
+
+        # Default will catch Fedora which uses systemd
+        default: {
+          $service_reload = "systemctl reload ${service_name}"
+          $service_status = "systemctl status ${service_name}"
+        }
+      }
+
       $psql_path           = pick($psql_path, "${bindir}/psql")
 
       $perl_package_name   = pick($perl_package_name, 'perl-DBD-Pg')
